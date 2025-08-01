@@ -6,7 +6,8 @@ authors = [
     { name = "Freddie Hill", email = "your.email@example.com" },
 ]
 dependencies = [
-    "opencv",
+    "opencv-python",
+    "numpy",
     # "pandas",
     "ipykernel",
     # "numpy",
@@ -19,21 +20,4 @@ requires-python = ">=3.11"
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
-# [tool.setuptools.packages.find]
-# where = ["."] # Search for packages in the current directory
-# include = ["my_tf_project*"] # Include the 'my_tf_project' package
-#
-# [tool.black]
-# line-length = 88
-# target-version = ['py39']
-#
-# [tool.isort]
-# profile = "black"
-#
-# [tool.mypy]
-# ignore_missing_imports = true
-#
-#
-
-
-
+# poetry install --no-root
