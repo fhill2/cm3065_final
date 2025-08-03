@@ -151,7 +151,6 @@ def rice_encode(samples, k):
         quotient = s_folded >> k
         remainder = s_folded & (m - 1)
 
-        # Optimized unary part: directly append '1's and then '0'
         unary_bits = bitarray('1' * quotient + '0')
 
         remainder_bits = int2ba(int(remainder), length=k)
@@ -228,11 +227,13 @@ if __name__ == "__main__":
     source_audio_data, source_sr = sf.read(input_wav_path, dtype='int32')
     residuals = encode_high_order_predictor(source_audio_data)
     print(residuals)
+    print("Encoding...")
     residuals = rice_encode(residuals, K)
     write_residuals(residuals, encoded_path)
 
 
     residuals = read_residuals(encoded_path)
+    print("Decoding...")
     decoded_residuals = rice_decode(residuals, K)
     reconstructed_signal = decode_high_order_predictor(decoded_residuals)
     sf.write(f"{base_filename}_EncDec.wav", reconstructed_signal, source_sr)
