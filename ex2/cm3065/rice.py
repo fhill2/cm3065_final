@@ -6,7 +6,8 @@ from bitarray.util import int2ba, ba2int
 import json
 import os # For path manipulation and checking file existence
 import time # For time tracking
-
+from multiprocessing import Pool, cpu_count
+from scipy.io import wavfile
 # --- Core Rice Coding Functions ---
 
 def write_residuals(bit_array: bitarray, filename: str) -> None:
@@ -134,31 +135,111 @@ def decode_high_order_predictor(residuals):
         
     return reconstructed_signal
 
-def rice_encode(samples, k):
+def _encode_single_sample_chunk(chunk_data: tuple) -> bitarray:
     """
-    Rice encodes an array of integers 'samples' (residuals) with parameter 'k'
-    and returns their combined Rice code as a single bitarray.
-    Handles signed integers using folding (interleaving).
+    Helper function to encode a chunk of samples. Designed to be run by a multiprocessing worker.
+    Args:
+        chunk_data (tuple): A tuple containing (samples_chunk, k).
+    Returns:
+        bitarray: The combined Rice code for the samples in this chunk.
     """
-    encoded_bitstream = bitarray()
-    for s in samples:
+    samples_chunk, k = chunk_data
+    
+    # Use a Python list to accumulate all bits (as 0s and 1s) for this chunk
+    # This ensures consistent type for bitarray.extend()
+    chunk_bits_accumulator = []
+    
+    # Pre-calculate 2^k and (2^k - 1) for efficiency within the chunk
+    two_pow_k = 1 << k
+    mask_k_bits = two_pow_k - 1
+
+    for s in samples_chunk:
+        # Step 1: Fold the signed integer 's' into a non-negative 's_folded'.
         if s < 0:
             s_folded = (abs(s) << 1) - 1
         else:
             s_folded = s << 1
 
-        m = 2 ** k
+        # Step 2: Calculate quotient and remainder for the folded value.
         quotient = s_folded >> k
-        remainder = s_folded & (m - 1)
+        remainder = s_folded & mask_k_bits
 
-        unary_bits = bitarray('1' * quotient + '0')
+        # Step 3: Append unary code ('1's followed by '0').
+        # Use simple list extension with 1s and 0s.
+        chunk_bits_accumulator.extend([1] * quotient)
+        chunk_bits_accumulator.append(0) # Append the '0' terminator
 
-        remainder_bits = int2ba(int(remainder), length=k)
+        # Step 4: Append remainder bits (fixed length k binary).
+        # Convert the remainder directly to a list of its bits (0 or 1).
+        # int2ba returns a bitarray, which is iterable, but converting to list explicitly
+        # might clarify the type, or just iterate over it.
+        # Simplest and clearest is to convert to a list of ints/bools.
+        remainder_bitarray = int2ba(int(remainder), length=k)
+        chunk_bits_accumulator.extend(list(remainder_bitarray)) # Convert bitarray to list of ints/bools
 
-        encoded_bitstream.extend(unary_bits + remainder_bits)
-    return encoded_bitstream
+    # Convert the accumulated list of bits (0s and 1s) into a bitarray
+    return bitarray(chunk_bits_accumulator)
 
 
+
+def rice_encode(samples: list[int] | np.ndarray, k: int) -> bitarray:
+    """
+    Rice encodes an array of integers 'samples' (residuals) with parameter 'k'.
+    Handles signed integers by first 'folding' them to a non-negative
+    representation. Processes samples sequentially without multiprocessing.
+
+    Args:
+        samples (list[int] | np.ndarray): The array or list of integer residuals to encode.
+                                         Can contain positive or negative values.
+        k (int): The Rice parameter (non-negative integer).
+
+    Returns:
+        bitarray: The combined Rice code for all input samples as a single bitarray.
+    """
+    num_samples = len(samples)
+    final_encoded_bitstream = bitarray()
+
+    print(f"Encoding {num_samples} samples sequentially...")
+
+    # Ensure samples are standard Python integers for consistent to_bytes() behavior
+    # This also helps with the bitarray operations
+    if isinstance(samples, np.ndarray):
+        samples = samples.tolist()
+
+    for i, sample in enumerate(samples):
+        # 1. Zigzag encode (fold signed to unsigned)
+        # Ensure 'sample' is a standard Python int before bitwise operations for consistency
+        # although Python's int handles large numbers natively.
+        # The zigzag_encode logic is correct for mapping signed to unsigned.
+        unsigned_sample = (sample << 1) ^ (sample >> 31)
+
+        # 2. Rice encode the unsigned sample
+        q = unsigned_sample >> k
+        r = unsigned_sample & ((2 ** k) - 1)
+
+        single_sample_bitarray = bitarray()
+
+        # Unary part (q ones followed by a zero)
+        # Use extend() with a string of '1's
+        single_sample_bitarray.extend('1' * q)
+        single_sample_bitarray.append(0) # Append a single 0 bit
+
+        # Remainder part (k bits)
+        if k > 0: # Only append remainder bits if k > 0
+            # To append exact 'k' bits of 'r', iterate over bits
+            # r needs to be a standard Python int for consistent bitwise ops if it was numpy.
+            # (r >> bit_pos) & 1 will give 0 or 1. append() takes 0/1 or bool.
+            for bit_pos in range(k - 1, -1, -1): # From MSB to LSB
+                single_sample_bitarray.append((r >> bit_pos) & 1)
+        
+        final_encoded_bitstream.extend(single_sample_bitarray)
+
+        # Optional: Basic progress indicator
+        if (i + 1) % (num_samples // 100000 + 1) == 0: 
+            print(f"Encoding Progress: {((i + 1) / num_samples) * 100:.2f}% ({i + 1}/{num_samples} samples)", end='\r')
+
+    print(f"\nEncoding Progress: 100.00% ({num_samples}/{num_samples} samples) 👍") # Final progress update
+    return final_encoded_bitstream
 def rice_decode(bit_stream: bitarray, k: int) -> list[int]:
     """
     Decodes all Rice-encoded numbers from a bitarray.
@@ -173,9 +254,7 @@ def rice_decode(bit_stream: bitarray, k: int) -> list[int]:
     two_pow_k = 1 << k
 
     while current_bit_offset < len_bit_stream:
-        # Progress indicator (optional, remove for max performance)
-        percentage = (current_bit_offset / len_bit_stream) * 100
-        print(f"Progress: {percentage:.2f}%")
+
 
         try:
             # Find the '0' terminator for the unary part
@@ -214,6 +293,10 @@ def rice_decode(bit_stream: bitarray, k: int) -> list[int]:
             s_unfolded = -((s_folded + 1) >> 1)
         
         decoded_samples.append(s_unfolded)
+
+        if current_bit_offset % 100000 == 0:
+            percentage = (current_bit_offset / len_bit_stream) * 100
+            print(f"Progress: {percentage:.2f}%")
             
     return decoded_samples
 
@@ -224,7 +307,10 @@ if __name__ == "__main__":
     
     K = 4
 
-    source_audio_data, source_sr = sf.read(input_wav_path, dtype='int32')
+    # source_audio_data, source_sr = sf.read(input_wav_path, dtype='int32')
+    sr, source_audio_data  = wavfile.read(input_wav_path)
+    source_audio_data: list[int] = list(map(int, source_audio_data))
+
     residuals = encode_high_order_predictor(source_audio_data)
     print(residuals)
     print("Encoding...")
@@ -233,11 +319,16 @@ if __name__ == "__main__":
 
 
     residuals = read_residuals(encoded_path)
+
     print("Decoding...")
     decoded_residuals = rice_decode(residuals, K)
     reconstructed_signal = decode_high_order_predictor(decoded_residuals)
-    sf.write(f"{base_filename}_EncDec.wav", reconstructed_signal, source_sr)
 
-    roundtrip_audio_data, _ = sf.read(f"{base_filename}_EncDec.wav", dtype='int32')
-    assert np.array_equal(source_audio_data, roundtrip_audio_data)
+
+    roundtrip_path = f"{base_filename}_EncDec.wav"
+    wavfile.write(roundtrip_path, sr, reconstructed_signal)
+
+
+    sr, roundtrip_audio_data  = wavfile.read(roundtrip_path)
+    assert np.array_equal(source_audio_data, reconstructed_signal)
 

@@ -1,6 +1,7 @@
 from pathlib import Path
 from scipy.io import wavfile
 import os
+import soundfile as sf
 
 def linear_predict_order_2_encode(samples: list[int]) -> list[int]:
     """Linear prediction: predict as 2*prev - prev_prev"""
@@ -115,29 +116,37 @@ def read_bitstring_from_file_with_padding_count(filename: str) -> str:
 
 if __name__ == "__main__":
     
-    paths = [
-        Path("/home/f1/projects/cm3065_final/files/Exercise2_Files/Sound1.wav"),
-        Path("/home/f1/projects/cm3065_final/files/Exercise2_Files/Sound2.wav"),
-    ]
-    print(f"sound1 size: {file_size_kb_str(paths[0])}")
+    # paths = [
+    #     Path("/home/f1/projects/cm3065_final/files/Exercise2_Files/Sound1.wav"),
+    #     Path("/home/f1/projects/cm3065_final/files/Exercise2_Files/Sound2.wav"),
+    # ]
+    # print(f"sound1 size: {file_size_kb_str(paths[0])}")
     # print(f"sound2 size: {file_size_kb_str(paths[1])}")
+
+
+    base_filename = "Sound1" 
+    input_wav_path = f"{base_filename}.wav" 
+    encoded_path = f"{base_filename}_Enc.ex2"
+    # source_audio_data, source_sr = sf.read(input_wav_path, dtype='int32')
+    # source_audio_data = source_audio_data.astype(int).tolist()
+    # print(source_audio_data)
     
-    path = paths[1]
-    k = 2
-    sr, expected = wavfile.read(path)
-    
-    expected: list[int] = list(map(int, expected))
-    residuals: list[int] = linear_predict_order_2_encode(expected)
-    print(residuals)
+    # path = paths[0]
+    k = 4
+    sr, expected = wavfile.read(input_wav_path)
+    source_audio_data: list[int] = list(map(int, expected))
+    #
+    print("Encoding")
+    residuals: list[int] = linear_predict_order_2_encode(source_audio_data)
     unsigned: list[int] = list(map(zigzag_encode, residuals))
     riced: str = ''.join(rice_encode(i, k) for i in unsigned)
     
-    out_path = path.parent / (path.stem + "_Enc.ex2")
-    write_bitstring_to_file_with_padding_count(riced, out_path)
-    # print(f"{out_path} (K = {k} bits): {file_size_kb_str(out_path)}")
-    # riced: str = read_bitstring_from_file_with_padding_count(out_path)
-    #
-    # unsigned: list[int] = rice_decode_all(riced, k)
-    # residuals: list[int] = list(map(zigzag_decode, unsigned))
-    # decoded: list[int] = linear_predict_order_2_decode(residuals)
-    # assert decoded == expected
+    # out_path = path.parent / (path.stem + "_Enc.ex2")
+    write_bitstring_to_file_with_padding_count(riced, encoded_path)
+    print(f"{encoded_path} (K = {k} bits): {file_size_kb_str(encoded_path)}")
+    riced: str = read_bitstring_from_file_with_padding_count(encoded_path)
+    
+    unsigned: list[int] = rice_decode_all(riced, k)
+    residuals: list[int] = list(map(zigzag_decode, unsigned))
+    decoded: list[int] = linear_predict_order_2_decode(residuals)
+    assert decoded == source_audio_data
