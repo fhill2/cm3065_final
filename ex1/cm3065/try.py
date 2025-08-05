@@ -111,7 +111,7 @@ def region_of_interest(frame):
 
 def main():
     cap = cv2.VideoCapture("Traffic_Laramie_1.mp4")
-    object_detector = cv2.createBackgroundSubtractorMOG2()
+    subtractor = cv2.createBackgroundSubtractorMOG2()
 
     tracker = CarTracker(max_distance=120)
     
@@ -138,7 +138,7 @@ def main():
 
         roi = region_of_interest(frame)
         
-        mask = object_detector.apply(roi)
+        mask = subtractor.apply(roi)
         _, mask = cv2.threshold(mask, 254, 255, cv2.THRESH_BINARY)
         contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
@@ -184,6 +184,7 @@ def main():
         # Display the left turn counter in real-time
         cv2.putText(roi, f"Left Turns: {left_turn_counter}", (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
 
+        cv2.imshow("Mask", mask)
         cv2.imshow("Roi", roi)
 
         key = cv2.waitKey(2)

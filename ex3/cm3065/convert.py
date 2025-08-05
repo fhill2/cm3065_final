@@ -10,16 +10,14 @@ def encode_video(input_path: Path, params):
         acodec=params["audio_codec"],
         r=params["frame_rate"],
         aspect=params['aspect_ratio'],
-        video_bitrate = f"{params['video_bit_rate']['max']}k", # ffmpeg-python expects 'k' suffix for kilobits
+        # ffmpeg-python expects 'k' suffix for kilobits
+        video_bitrate = f"{params['video_bit_rate']['max']}k",
         audio_bitrate = f"{params['audio_bit_rate']['max']}k",
         ac=params['audio_channels']
 
     )
-
     stream = ffmpeg.input(input_path)
 
-
-    # Apply scaling to desired resolution
     res_parts = str(params['resolution']).split('x')
     width = res_parts[0].strip()
     height = res_parts[1].strip()
@@ -69,27 +67,10 @@ def metadata(video_path):
     # Parse the JSON output
     metadata = json.loads(result.stdout)
 
-    # Initialize a more structured metadata dictionary for cleaner access
-    parsed_metadata = {
-        'video_path': None,
-        "video_format": None,
-        "video_codec": None,
-        "audio_codec": None,
-        "frame_rate": None,
-        "aspect_ratio": None,
-        "resolution": None,
-        "video_bit_rate": None, # in bits/s
-        "audio_bit_rate": None, # in bits/s
-        "audio_channels": None,
-    }
-
-    parsed_metadata["video_path"] = video_path
-
     # Extract format information
     format_info = metadata.get('format', {})
     audio = next((s for s in metadata.get("streams") if s.get("codec_type") == "audio"))
     video = next((s for s in metadata.get("streams") if s.get("codec_type") == "video"))
-    print(video)
     return dict(
             video_path = video_path,
             video_format = format_info.get('format_name'),
@@ -121,7 +102,7 @@ if __name__ == "__main__":
         resolution="640 x 360",
         video_bit_rate=dict(
             min=2_000_000,
-            max=2_000_000,
+            max=5_000_000,
         ),
         audio_bit_rate=dict(
             max=256000
@@ -143,10 +124,9 @@ if __name__ == "__main__":
             # ffprobe outputs bit rates in bits per second
             # 1 Mb/s = 1_000_000 bits per second
             # 1 kb/s = 1000 bits per second
-            video_bit_rate=2_000_000 >= meta["video_bit_rate"] > 5_000_000,
-            audio_bit_rate=meta["audio_bit_rate"] < 256000,
-            audio_channels=meta["audio_channels"] == 2
-
+            video_bit_rate=expected['video_bit_rate']['min'] <= meta["video_bit_rate"] <= expected['video_bit_rate']['max'],
+            audio_bit_rate=meta["audio_bit_rate"] <= expected['audio_bit_rate']['max'],
+            audio_channels=meta["audio_channels"] == expected['audio_channels']
         )
 
         report = str(meta['video_path']) +  "\n"
@@ -166,9 +146,15 @@ if __name__ == "__main__":
 
         info.append((meta, requirements, report))
 
-    for meta, req, report in info:
-        print(report)
 
+
+    print(f"-------------- REPORTS ---------------")
+    for _, _, report in info:
+        print(report)
+    print(f"-------------- END REPORT ---------------")
+
+    for meta, req, _ in info:
+        print(f"-------------- Processing Video {str(meta['video_path'])} ---------------")
         if any(not r for r in req.values()):
             encode_video(meta["video_path"], expected)
  
