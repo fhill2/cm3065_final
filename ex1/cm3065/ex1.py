@@ -15,8 +15,8 @@ class Car:
         self.h = h
         self.cx = int(x + w / 2)
         self.cy = int(y + h / 2)
-        self.inside_box1 = False  # To track if the car has entered the first detection box
-        self.inside_box2 = False  # To track if the car has entered the second detection box
+        self.inside_box1 = False
+        self.inside_box2 = False
 
 class CarTracker:
     """
@@ -39,8 +39,6 @@ class CarTracker:
                                 can be from an existing one to be considered
                                 the same object.
         """
-        # Dictionary to store the Car objects of currently tracked objects.
-        # Format: {object_id: Car_object}
         self.tracked_objects = {}
         
         # A counter for assigning new unique IDs.
@@ -110,7 +108,7 @@ def region_of_interest(frame):
     return mask
 
 def main():
-    cap = cv2.VideoCapture("Traffic_Laramie_1.mp4")
+    cap = cv2.VideoCapture("Traffic_Laramie_2.mp4")
     subtractor = cv2.createBackgroundSubtractorMOG2()
 
     tracker = CarTracker(max_distance=120)

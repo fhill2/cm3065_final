@@ -29,7 +29,7 @@ def write_residuals(bit_array: bitarray, filename: str) -> None:
     with open(filename, 'wb') as f:
         f.write(output_bytes)
     
-    print(f"Wrote {len(bit_array)} original bits with {padding_count} padding bits to '{filename}'.")
+    print(f"Wrote {len(bit_array)} to '{filename}'.")
 
 def read_residuals(filename: str) -> bitarray:
     with open(filename, 'rb') as f:
@@ -212,7 +212,7 @@ def rice_decode(bit_stream: bitarray, k: int) -> list[int]:
     return decoded_samples
 
 if __name__ == "__main__":
-    base_filename = "Sound1" 
+    base_filename = "Sound2" 
     input_wav_path = f"{base_filename}.wav" 
     encoded_path = f"{base_filename}_Enc.ex2"
     
@@ -236,12 +236,10 @@ if __name__ == "__main__":
     roundtrip_path = f"{base_filename}_Enc_Dec.wav"
     wavfile.write(roundtrip_path, sr, reconstructed_signal)
 
-    print("==== Summary ====")
     source_size = os.path.getsize(input_wav_path)
     encoded_size = os.path.getsize(encoded_path)
-    print(f"K={K}")
-    print(f"source: {input_wav_path}: {source_size}")
-    print(f"encoded: {encoded_path}: {encoded_size}")
+    print(f"source: {input_wav_path}: {source_size} bytes")
+    print(f"encoded: {encoded_path}: {encoded_size} bytes")
     # difference = abs(source_size - roundtrip_size)
     pdiff = (encoded_size / source_size) * 100
     print(f"%Compression: {pdiff}")

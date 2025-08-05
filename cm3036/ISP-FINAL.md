@@ -119,10 +119,10 @@ assert np.array_equal(source_audio_data, reconstructed_signal)
 
 #### Results
 
-|            | Original Size | Rice (K = 4 bits) | Rice (K =2 bits) | %Compression (K=4) | %Compression (K=2) |
-| ---------- | ------------- | ----------------- | ---------------- | ------------------ | ------------------ |
-| Sound1.wav | 1002088       | 909958            | 2660076          | 90.8%              | 265%               |
-| Sound2.wav | 1008044       | 121228290         | 483936582        | 12026%             | 48007%             |
+|            | Original Size (bytes) | Rice (K = 4 bits) | Rice (K =2 bits) | %Compression (K=4) | %Compression (K=2) |
+| ---------- | --------------------- | ----------------- | ---------------- | ------------------ | ------------------ |
+| Sound1.wav | 1002088               | 909958            | 2660076          | 90.8%              | 265%               |
+| Sound2.wav | 1008044               | 121228290         | 483936582        | 12026%             | 48007%             |
 
 The results show the K value of the Rice Encoder directly impacting output file size, for both inputs. This is because the quotient value in the encoder is bitwise right shifted by k. As K increases, less bits are stored to represent a sample.
 

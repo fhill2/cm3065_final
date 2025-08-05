@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "video.md",
+                "file": "ISP-FINAL.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "video"
+              "title": "ISP-FINAL"
             }
           }
         ]
@@ -114,7 +114,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "video.md",
+                "file": "ISP-FINAL.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -124,7 +124,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for video"
+              "title": "Backlinks for ISP-FINAL"
             }
           },
           {
@@ -133,12 +133,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "video.md",
+                "file": "ISP-FINAL.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from video"
+              "title": "Outgoing links from ISP-FINAL"
             }
           },
           {
@@ -162,13 +162,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "video.md",
+                "file": "ISP-FINAL.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of video"
+              "title": "Outline of ISP-FINAL"
             }
           }
         ]
@@ -188,10 +188,10 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "c349b66b70925c3f",
+  "active": "cabc0fa9b10574c6",
   "lastOpenFiles": [
-    "ISP-FINAL.md",
     "video.md",
+    "ISP-FINAL.md",
     "transformer.webp",
     "opencv.jpg",
     "Welcome.md"
