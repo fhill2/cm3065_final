@@ -1,5 +1,4 @@
 import numpy as np
-import soundfile as sf
 import wave
 from bitarray import bitarray
 from bitarray.util import int2ba, ba2int
@@ -218,7 +217,6 @@ if __name__ == "__main__":
     
     K = 2
 
-    # source_audio_data, source_sr = sf.read(input_wav_path, dtype='int32')
     sr, source_audio_data  = wavfile.read(input_wav_path)
 
     residuals = encode_high_order_predictor(source_audio_data)

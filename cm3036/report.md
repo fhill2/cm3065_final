@@ -1,5 +1,3 @@
-
-
 # Exercise 1
 
 This application uses the python `opencv` library to detect and track cars in a video. It also counts how many times cars take a left hand turn at the intersection.
@@ -20,6 +18,18 @@ A car has successfully completed the turn when the centroid value has entered bo
 
 ![opencv](opencv.jpg)
 
+#### Results
+
+This table of results shows:
+- the total amount of cars that made a left hand turn at the intersection.
+- the amount of cars per minute that made the left hand turn at the intersection.
+
+|                       | Total Number of cars | Cars per minute |
+| --------------------- | -------------------- | --------------- |
+| Traffic_Laramie_1.mp4 | 6                    | 2.02            |
+| Traffic_Laramie_2.mp4 | 0                    | 0               |
+
+#### Enhancements
 
 Currently the project uses distance to associate existing cars with cars in the current frame. A key disadvantage to this approach is the car IDs switch when cars overlap in the frame, making it difficult to maintain consistent tracking. To prevent the ID switching, I've removed part of the frame where this happens from the Region of Interest, but this is not an ideal solution.
 
@@ -30,6 +40,8 @@ There are better, state-of-the-art technologies that track objects based on diff
 [DeepSort](https://trackers.roboflow.com/develop/trackers/core/deepsort/tracker/) - The detections from YOLO are fed into DeepSORT that combiners motion-based prediction and appearance based matching. It uses a [Kalman filter](https://en.wikipedia.org/wiki/Kalman_filter) to predict the next position of a tracked object, helping it track even if the object is temporarily hidden. It also uses a pre-trained Convolutional Neural Network to extract unique features about the object.
 
 # Exercise 2
+
+Here is the [Coursera Jupyter Notebook Link]([https://hub.labs.coursera.org:443/connect/sharedmrhdfpjv?forceRefresh=false&isLabVersioning=true](https://hub.labs.coursera.org:443/connect/sharedmrhdfpjv?forceRefresh=false&isLabVersioning=true)).
 
 This application defines a codec for the lossless data compression method 'Rice coding'. The codec is based on the specification defined at [Michael Dipperstein's Github](https://michaeldipperstein.github.io/rice.html)
 
@@ -161,9 +173,17 @@ The codec's performance can be improved by using a language that offers more dir
 
 # Exercise 3
 
+Here is the [Coursera Jupyter Notebook Link]([https://hub.labs.coursera.org:443/connect/sharedmrhdfpjv?forceRefresh=false&isLabVersioning=true](https://hub.labs.coursera.org:443/connect/sharedmrhdfpjv?forceRefresh=false&isLabVersioning=true)).
+
 This application is a video analysis and re-encoding tool that checks video files against a predetermined format. If the video file does not meet the expected requirements, the video is encoded. A report is generated for every video, showing what properties did not meet the requirements.
 
 I'm using the ffmpeg-python in this application to encode the video. ffmpeg-python is a python wrapper around ffmpeg. It builds the command line arguments for ffmpeg in python using strings, and uses the `subprocess` module to execute ffmpeg on PATH.  
+
+I've installed ffmpeg and ffprobe on my linux debian system using the apt package manager. `apt install` installs ffmpeg and ffprobe directly onto PATH at /usr/bin/ffmpeg|ffprobe
+
+```bash
+sudo apt install ffmpeg # also installs ffprobe
+```
 
 *Parsing Metadata*
 

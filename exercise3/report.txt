@@ -1,0 +1,47 @@
+-------------- REPORTS ---------------
+video/Cosmos_War_of_the_Planets.mp4
+  · video_codec: h264 OK
+  · audio_codec: aac OK
+  · frame_rate: 29.97 FAIL, 25
+  · aspect_ratio: 314:177 FAIL, 16:9
+  · resolution: 628 x 354 FAIL, 640 x 360
+  · video_bit_rate: 2989377 OK
+  · audio_bit_rate: 317103 FAIL, < 256000
+  · audio_channels: 2 OK
+video/Last_man_on_earth_1964.mov
+  · video_codec: prores FAIL, h264
+  · audio_codec: pcm_s16le FAIL, aac
+  · frame_rate: 23.98 FAIL, 25
+  · aspect_ratio: 16:9 OK
+  · resolution: 640 x 360 OK
+  · video_bit_rate: 9285191 FAIL, 2000000 >= video_bit_rate < 5000000
+  · audio_bit_rate: 1536000 FAIL, < 256000
+  · audio_channels: 2 OK
+video/The_Gun_and_the_Pulpit.avi
+  · video_codec: rawvideo FAIL, h264
+  · audio_codec: pcm_s16le FAIL, aac
+  · frame_rate: 25.0 OK
+  · aspect_ratio: 180:101 FAIL, 16:9
+  · resolution: 720 x 404 FAIL, 640 x 360
+  · video_bit_rate: 87438878 FAIL, 2000000 >= video_bit_rate < 5000000
+  · audio_bit_rate: 1536000 FAIL, < 256000
+  · audio_channels: 2 OK
+video/The_Hill_Gang_Rides_Again.mp4
+  · video_codec: h264 OK
+  · audio_codec: aac OK
+  · frame_rate: 25.0 OK
+  · aspect_ratio: 16:9 OK
+  · resolution: 640 x 360 OK
+  · video_bit_rate: 7537730 FAIL, 2000000 >= video_bit_rate < 5000000
+  · audio_bit_rate: 253272 OK
+  · audio_channels: 2 OK
+video/Voyage_to_the_Planet_of_Prehistoric_Women.mp4
+  · video_codec: hevc FAIL, h264
+  · audio_codec: mp3 FAIL, aac
+  · frame_rate: 29.97 FAIL, 25
+  · aspect_ratio: 16:9 OK
+  · resolution: 640 x 360 OK
+  · video_bit_rate: 8038857 FAIL, 2000000 >= video_bit_rate < 5000000
+  · audio_bit_rate: 320000 FAIL, < 256000
+  · audio_channels: 2 OK
+-------------- END REPORT ---------------

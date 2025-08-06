@@ -9,7 +9,6 @@ dependencies = [
     "numpy",
     "ipykernel",
     "bitarray",
-    "soundfile",
     "scipy"
 ]
 requires-python = ">=3.11"
